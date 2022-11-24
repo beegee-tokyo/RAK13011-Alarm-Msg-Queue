@@ -74,16 +74,16 @@ void send_delayed(TimerHandle_t unused)
 void switch_int_handler(void)
 {
 	switch_status = digitalRead(SWITCH_INT);
-	if (switch_status == LOW)
-	{
-		digitalWrite(LED_GREEN, HIGH);
-		digitalWrite(LED_BLUE, LOW);
-	}
-	else
-	{
-		digitalWrite(LED_GREEN, LOW);
-		digitalWrite(LED_BLUE, HIGH);
-	}
+	// if (switch_status == LOW)
+	// {
+	// 	digitalWrite(LED_GREEN, HIGH);
+	// 	digitalWrite(LED_BLUE, LOW);
+	// }
+	// else
+	// {
+	// 	digitalWrite(LED_GREEN, LOW);
+	// 	digitalWrite(LED_BLUE, HIGH);
+	// }
 	api_wake_loop(SWITCH_CHANGE);
 }
 
@@ -136,16 +136,16 @@ bool init_app(void)
 
 	attachInterrupt(SWITCH_INT, switch_int_handler, CHANGE);
 	switch_status = digitalRead(SWITCH_INT);
-	if (switch_status == LOW)
-	{
-		digitalWrite(LED_GREEN, HIGH);
-		digitalWrite(LED_BLUE, LOW);
-	}
-	else
-	{
-		digitalWrite(LED_GREEN, LOW);
-		digitalWrite(LED_BLUE, HIGH);
-	}
+	// if (switch_status == LOW)
+	// {
+	// 	digitalWrite(LED_GREEN, HIGH);
+	// 	digitalWrite(LED_BLUE, LOW);
+	// }
+	// else
+	// {
+	// 	digitalWrite(LED_GREEN, LOW);
+	// 	digitalWrite(LED_BLUE, HIGH);
+	// }
 
 	// Prepare timer for delayed sending
 	delayed_sending.begin(5000, send_delayed, NULL, false);
@@ -220,7 +220,6 @@ void app_event_handler(void)
 		}
 		else
 		{
-
 			// Reset the packet
 			g_solution_data.reset();
 
