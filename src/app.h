@@ -45,7 +45,7 @@
 extern CayenneLPP g_solution_data;
 
 /** Include the WisBlock-API */
-#include <WisBlock-API.h> // Click to install library: http://librarymanager/All#WisBlock-API
+#include <WisBlock-API-V2.h> // Click to install library: http://librarymanager/All#WisBlock-API-V2
 
 /** Include Cayenne LPP library */
 #include <CayenneLPP.h>

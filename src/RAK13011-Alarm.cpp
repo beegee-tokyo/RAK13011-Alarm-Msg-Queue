@@ -148,7 +148,7 @@ bool init_app(void)
 	// }
 
 	// Prepare timer for delayed sending
-	delayed_sending.begin(5000, send_delayed, NULL, false);
+	delayed_sending.begin(10000, send_delayed, NULL, false);
 
 	// Remember last send time
 	last_pos_send = millis();
@@ -188,6 +188,8 @@ void app_event_handler(void)
 		// if ((millis() - last_pos_send) < 10000)
 		if (lora_busy)
 		{
+			delayed_sending.stop();
+			delayed_sending.setPeriod(10000);
 			delayed_sending.start();
 			return;
 		}
@@ -213,54 +215,65 @@ void app_event_handler(void)
 		if (lora_busy)
 		{
 			MYLOG("APP", "LoRaWAN TX cycle not finished, skip this event");
-			if (g_enable_ble)
-			{
-				restart_advertising(15);
-			}
+			// if (g_enable_ble)
+			// {
+			// 	restart_advertising(15);
+			// }
 		}
 		else
 		{
-			// Reset the packet
-			g_solution_data.reset();
+			// Skip sending if not yet joined
+			if (g_lpwan_has_joined)
+			{ 
+				// Reset the packet
+				g_solution_data.reset();
 
-			// Get battery level
-			float batt_level_f = read_batt();
-			g_solution_data.addVoltage(LPP_CHANNEL_BATT, batt_level_f / 1000.0);
+				// Get battery level
+				float batt_level_f = read_batt();
+				g_solution_data.addVoltage(LPP_CHANNEL_BATT, batt_level_f / 1000.0);
 
-			// Add switch status, get the event out of the queue
-			uint32_t old_event = 0;
-			xQueueReceive(event_queue, &old_event, 0);
-			MYLOG("APP", "Pulled event from queue, pending %ld", uxQueueMessagesWaiting(event_queue));
+				// Add switch status, get the event out of the queue
+				uint32_t old_event = 0;
+				xQueueReceive(event_queue, &old_event, 0);
+				MYLOG("APP", "Pulled event from queue, pending %ld", uxQueueMessagesWaiting(event_queue));
+				MYLOG("APP", "Last event from queue was %ld", old_event);
 
-			g_solution_data.addPresence(LPP_CHANNEL_SWITCH, old_event);
+				g_solution_data.addPresence(LPP_CHANNEL_SWITCH, old_event);
 
-			// Add temperature & humidity if the sensor is available
-			if (has_rak1901)
-			{
-				read_rak1901();
-			}
-			lmh_error_status result = send_lora_packet(g_solution_data.getBuffer(), g_solution_data.getSize());
-			switch (result)
-			{
-			case LMH_SUCCESS:
-				MYLOG("APP", "Packet enqueued");
-				// Set a flag that TX cycle is running
-				lora_busy = true;
-
-				// Remember last send time
-				last_pos_send = millis();
-
-				if (xQueuePeek(event_queue, &old_event, 0) == pdTRUE)
+				// Add temperature & humidity if the sensor is available
+				if (has_rak1901)
 				{
-					delayed_sending.start();
+					read_rak1901();
 				}
-				break;
-			case LMH_BUSY:
-				MYLOG("APP", "LoRa transceiver is busy");
-				break;
-			case LMH_ERROR:
-				MYLOG("APP", "Packet error, too big to send with current DR");
-				break;
+				lmh_error_status result = send_lora_packet(g_solution_data.getBuffer(), g_solution_data.getSize());
+				switch (result)
+				{
+				case LMH_SUCCESS:
+					MYLOG("APP", "Packet enqueued");
+					// Set a flag that TX cycle is running
+					lora_busy = true;
+
+					// Remember last send time
+					last_pos_send = millis();
+
+					if (xQueuePeek(event_queue, &old_event, 0) == pdTRUE)
+					{
+						delayed_sending.stop();
+						delayed_sending.setPeriod(10000);
+						delayed_sending.start();
+					}
+					break;
+				case LMH_BUSY:
+					MYLOG("APP", "LoRa transceiver is busy");
+					break;
+				case LMH_ERROR:
+					MYLOG("APP", "Packet error, too big to send with current DR");
+					break;
+				}
+			}
+			else
+			{
+				MYLOG("APP", "Not yet joined");
 			}
 		}
 	}
@@ -316,7 +329,8 @@ void lora_data_handler(void)
 
 			// Force a sensor reading in 10 seconds
 			last_pos_send = millis();
-			delayed_sending.setPeriod(10000);
+			delayed_sending.stop();
+			delayed_sending.setPeriod(5000);
 			delayed_sending.start();
 		}
 		else
