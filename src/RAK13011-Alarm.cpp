@@ -34,6 +34,8 @@ uint8_t send_fail = 0;
 
 uint32_t switch_status = LOW;
 
+uint32_t last_switch_status = 0;
+
 #define SWITCH_CHANGE 0b1000000000000000
 #define N_SWITCH_CHANGE 0b0111111111111111
 
@@ -136,6 +138,8 @@ bool init_app(void)
 
 	attachInterrupt(SWITCH_INT, switch_int_handler, CHANGE);
 	switch_status = digitalRead(SWITCH_INT);
+	last_switch_status = switch_status;
+
 	// if (switch_status == LOW)
 	// {
 	// 	digitalWrite(LED_GREEN, HIGH);
@@ -238,13 +242,21 @@ void app_event_handler(void)
 					float batt_level_f = read_batt();
 					g_solution_data.addVoltage(LPP_CHANNEL_BATT, batt_level_f / 1000.0);
 
-					// Add switch status, get the event out of the queue
-					uint32_t old_event = 0;
-					xQueueReceive(event_queue, &old_event, 0);
-					MYLOG("APP", "Pulled event from queue, pending %ld", uxQueueMessagesWaiting(event_queue));
-					MYLOG("APP", "Last event from queue was %ld", old_event);
+					// Check if an event is in the queue
+					if (uxQueueMessagesWaiting(event_queue) != 0)
+					{
+						// Add switch status, get the event out of the queue
+						xQueueReceive(event_queue, &last_switch_status, 0);
+					}
+					else
+					{
+						MYLOG("APP", "Queue is empty, using last status");
+					}
 
-					g_solution_data.addPresence(LPP_CHANNEL_SWITCH, old_event);
+					MYLOG("APP", "Pulled event from queue, pending %ld", uxQueueMessagesWaiting(event_queue));
+					MYLOG("APP", "Last event from queue was %ld", last_switch_status);
+
+					g_solution_data.addPresence(LPP_CHANNEL_SWITCH, last_switch_status);
 
 					// Add temperature & humidity if the sensor is available
 					if (has_rak1901)
@@ -262,7 +274,7 @@ void app_event_handler(void)
 						// Remember last send time
 						last_pos_send = millis();
 
-						if (xQueuePeek(event_queue, &old_event, 0) == pdTRUE)
+						if (xQueuePeek(event_queue, &last_switch_status, 0) == pdTRUE)
 						{
 							delayed_sending.stop();
 							delayed_sending.setPeriod(10000);

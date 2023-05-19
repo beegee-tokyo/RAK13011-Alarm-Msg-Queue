@@ -192,11 +192,11 @@ float batt_level_f = read_batt();
 g_solution_data.addVoltage(LPP_CHANNEL_BATT, batt_level_f / 1000.0);
 
 // Add switch status, get the event out of the queue
-uint32_t old_event = 0;
-xQueueReceive(event_queue, &old_event, 0);
+uint32_t last_switch_status = 0;
+xQueueReceive(event_queue, &last_switch_status, 0);
 MYLOG("APP", "Pulled event from queue, pending %ld", uxQueueMessagesWaiting(event_queue));
 
-g_solution_data.addPresence(LPP_CHANNEL_SWITCH, old_event);
+g_solution_data.addPresence(LPP_CHANNEL_SWITCH, last_switch_status);
 
 lmh_error_status result = send_lora_packet(g_solution_data.getBuffer(), g_solution_data.getSize());
 ```
