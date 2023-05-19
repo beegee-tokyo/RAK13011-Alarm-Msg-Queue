@@ -12,7 +12,11 @@
 #include <Arduino.h>
 /** Add you required includes after Arduino.h */
 #include <Wire.h>
-#include <CayenneLPP.h>
+/** Include the WisBlock-API */
+#include <WisBlock-API-V2.h> // Click to install library: http://librarymanager/All#WisBlock-API-V2
+
+/** Include Cayenne LPP library */
+#include <wisblock_cayenne.h>
 
 // Debug output set to 0 to disable app debug output
 #ifndef MY_DEBUG
@@ -42,13 +46,7 @@
 #define LPP_CHANNEL_TEMP 3	  // RAK1901
 #define LPP_CHANNEL_SWITCH 48 // RAK13011
 
-extern CayenneLPP g_solution_data;
-
-/** Include the WisBlock-API */
-#include <WisBlock-API-V2.h> // Click to install library: http://librarymanager/All#WisBlock-API-V2
-
-/** Include Cayenne LPP library */
-#include <CayenneLPP.h>
+extern WisCayenne g_solution_data;
 
 /** Define the version of your SW */
 #define SW_VERSION_1 1 // major version increase on API change / not backwards compatible
