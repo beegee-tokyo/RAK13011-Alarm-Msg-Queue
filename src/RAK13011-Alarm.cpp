@@ -50,7 +50,7 @@ uint32_t last_switch_status = 0;
 // Slot F      WB_IO6
 //******************************************************************//
 
-#define SWITCH_INT WB_IO3
+#define SWITCH_INT WB_IO5 // Slot D
 
 // Event queue stuff
 struct sw_events
@@ -113,6 +113,9 @@ void setup_app(void)
 	digitalWrite(LED_GREEN, LOW);
 
 	MYLOG("APP", "WisBlock Switch Node");
+
+	// Set Application version
+	snprintf(g_custom_fw_ver, 63, "WisBlock Switch Node V%d.%d.%d", SW_VERSION_1, SW_VERSION_2, SW_VERSION_3);
 
 #ifdef NRF52_SERIES
 	// Enable BLE
