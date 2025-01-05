@@ -60,7 +60,7 @@ The reed relay contacts do not have any debouncing mechanism. It can easily happ
 
 The application code is available in two versions.    
 1) The first one is for the open source Arduino BSP and PlatformIO. It works with the WisBlock Core modules RAK4631, RAK11310 and RAK11200 (with RAK13300 LoRa module).     
-The application is based on the [WisBlock-API](https://github.com/beegee-tokyo/WisBlock-API). Instead of running endless in the **`loop()`**, it is using timers and events to keep the MCU in idle/sleep mode as much as possible.
+The application is based on the [WisBlock-API-V2](https://github.com/beegee-tokyo/WisBlock-API-V2). Instead of running endless in the **`loop()`**, it is using timers and events to keep the MCU in idle/sleep mode as much as possible.
 2) The second version is for RUI3 and works with the RAK4631-R and the RAK3372 Core modules. 
 
 ### ⚠️ WARNING    
@@ -110,7 +110,7 @@ For this tutorial I chose the second option:
 <b>2. LoRaWAN and BLE Communication </b>
 
   Open Source Arduino BSP and PlatformIO
-  - [WisBlock-API](https://registry.platformio.org/libraries/beegee-tokyo/WisBlock-API)
+  - [WisBlock-API-V2](https://registry.platformio.org/libraries/beegee-tokyo/WisBlock-API-V2)
   - [SX126x-Arduino LoRaWAN library](https://registry.platformio.org/libraries/beegee-tokyo/SX126x-Arduino)
 
   Both BSP versions
